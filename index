@@ -399,7 +399,7 @@ tr:hover td{background:var(--gray50);}
 <script>
 // ── BACKEND CONFIG ─────────────────────────────────────────
 // Replace with your GAS web app URL after deploying Code.gs
-var GAS_URL = 'YOUR_GAS_WEBAPP_URL_HERE';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwlAGZKoZcu6YrP71Blyl8F7WF9X5j9UKBDqnwXsj9tTT05QA08UzQ77hng2Qse4sA5Ug/exec';
 
 // Replaces google.script.run with fetch calls to GAS backend
 var gasRun = {

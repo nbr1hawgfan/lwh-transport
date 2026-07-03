@@ -3,10 +3,11 @@
   "short_name": "LWH Transport",
   "description": "LWH Transportation Quick Answers powered by BigQuery",
   "start_url": "/lwh-transport/",
+  "scope": "/lwh-transport/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0d1b3e",
-  "orientation": "landscape",
+  "orientation": "landscape-primary",
   "icons": [
     {
       "src": "icons/icon-192.png",

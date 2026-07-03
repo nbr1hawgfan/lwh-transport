@@ -400,14 +400,16 @@ tr:hover td{background:var(--gray50);}
 // ── BACKEND CONFIG ─────────────────────────────────────────
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwlAGZKoZcu6YrP71Blyl8F7WF9X5j9UKBDqnwXsj9tTT05QA08UzQ77hng2Qse4sA5Ug/exec';
 
-// POST with Content-Type: text/plain — same pattern as all other LWH PWAs
-// This avoids CORS preflight; GAS accepts and responds without CORS block
+// POST with Content-Type: text/plain avoids CORS preflight
+// Body sent as form-encoded string — GAS reads via e.parameter
 var gasRun = {
   call: function(fn, args, onSuccess, onError) {
+    var body = 'fn=' + encodeURIComponent(fn) +
+               '&args=' + encodeURIComponent(JSON.stringify(args || []));
     fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ fn: fn, args: args || [] })
+      body: body
     })
     .then(function(r) { return r.json(); })
     .then(function(d) {

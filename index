@@ -680,8 +680,8 @@ function set(html){document.getElementById('R').innerHTML=html;}
 function loading(){set('<div class="loader"><div class="spin"></div><p>Getting your answer...</p></div>');}
 function sm(rows,ci){return rows.reduce(function(s,r){return s+(parseFloat(r[ci])||0);},0);}
 function fmt(n){return(parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
-function tod(){return new Date().toISOString().split('T')[0];}
-function wk(){var d=new Date();d.setDate(d.getDate()-7);return d.toISOString().split('T')[0];}
+function tod(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function wk(){var d=new Date();d.setDate(d.getDate()-7);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function mname(m){return['','January','February','March','April','May','June','July','August','September','October','November','December'][+m]||m;}
 // ── SERVICE WORKER ─────────────────────────────────────────
 if ('serviceWorker' in navigator) {

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="LWH Transport">
+<meta name="theme-color" content="#0a0a0a">
+<title>LWH Transport — Quick Answers</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --amber:#f0a500;
+  --amber-light:#fff8e6;
+  --amber-dark:#d4900a;
+  --black:#0d1b3e;
+  --white:#ffffff;
+  --gray50:#f9f9f9;
+  --gray100:#f2f2f2;
+  --gray200:#e4e4e4;
+  --gray300:#c8c8c8;
+  --gray400:#999;
+  --gray600:#555;
+  --gray800:#222;
+  --green:#16a34a;
+  --green-bg:#f0fdf4;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --nav-w:256px;
+  --hdr-h:58px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow:0 2px 8px rgba(0,0,0,.10);
+  --shadow-md:0 4px 16px rgba(0,0,0,.12);
+  --r:8px;
+}
+html,body{height:100%;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--gray100);color:var(--black);font-size:13px;line-height:1.5;}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.hdr{
+  position:fixed;top:0;left:0;right:0;height:var(--hdr-h);z-index:200;
+  background:var(--black);
+  display:flex;align-items:center;
+  padding:0 20px 0 0;
+  border-bottom:3px solid var(--amber);
+}
+.hdr-brand{
+  width:var(--nav-w);flex-shrink:0;
+  display:flex;align-items:center;gap:10px;
+  padding:0 20px;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.hdr-logo{
+  height:34px;background:var(--amber);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;color:var(--black);
+  flex-shrink:0;padding:0 10px;letter-spacing:.5px;
+}
+.hdr-name{font-size:13px;font-weight:800;color:var(--white);letter-spacing:.2px;line-height:1.2;}
+.hdr-name span{display:block;font-size:10px;font-weight:400;color:rgba(255,255,255,.4);letter-spacing:.5px;text-transform:uppercase;margin-top:1px;}
+.hdr-stats{flex:1;display:flex;gap:24px;padding:0 24px;}
+.hstat{display:flex;flex-direction:column;}
+.hstat-l{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.35);font-weight:600;}
+.hstat-v{font-size:12px;font-weight:700;color:var(--white);}
+.hdr-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.inst-btn{display:none;font-size:11px;font-weight:700;background:var(--amber);color:var(--black);border:none;padding:6px 14px;border-radius:20px;cursor:pointer;}
+.inst-btn.on{display:block;}
+.upill{
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  padding:5px 12px 5px 5px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.12);
+  transition:background .15s;
+}
+.upill:hover{background:rgba(255,255,255,.08);}
+.uav{width:28px;height:28px;background:var(--amber);color:var(--black);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.unm{font-size:11px;font-weight:600;color:var(--white);}
+
+/* ── SHELL ───────────────────────────────────────────────── */
+.shell{display:flex;padding-top:var(--hdr-h);min-height:100vh;}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar{
+  width:var(--nav-w);flex-shrink:0;
+  position:fixed;top:var(--hdr-h);bottom:0;left:0;
+  background:var(--white);
+  border-right:1px solid var(--gray200);
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+  box-shadow:var(--shadow-sm);
+}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--gray200);border-radius:2px;}
+.sb-section{padding:14px 10px 6px;}
+.sb-label{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--gray400);
+  padding:0 8px;margin-bottom:4px;
+}
+.sb-btn{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:8px 10px;border-radius:6px;
+  background:none;border:none;color:var(--black);
+  font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .12s;text-align:left;font-family:inherit;
+  margin-bottom:1px;
+}
+.sb-btn:hover{background:var(--gray100);color:var(--black);}
+.sb-btn.on{background:var(--amber-light);color:var(--black);font-weight:800;border-left:3px solid var(--amber);padding-left:7px;}
+.sb-btn.on .sb-ic{background:var(--amber);}
+.sb-ic{
+  width:34px;height:22px;border-radius:3px;
+  background:var(--gray200);
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:800;letter-spacing:.5px;
+  color:var(--gray600);flex-shrink:0;transition:background .12s;
+}
+.sb-rule{height:1px;background:var(--gray200);margin:6px 10px;}
+
+/* ── MAIN ────────────────────────────────────────────────── */
+.main{margin-left:var(--nav-w);flex:1;padding:24px;max-width:calc(100vw - var(--nav-w));}
+
+/* ── FILTER PANEL ────────────────────────────────────────── */
+.fp{
+  background:var(--white);border:1px solid var(--gray200);
+  border-radius:var(--r);margin-bottom:22px;
+  overflow:hidden;box-shadow:var(--shadow-sm);
+  display:none;
+}
+.fp.on{display:block;}
+.fp-head{
+  background:var(--black);padding:14px 20px;
+  display:flex;align-items:center;gap:12px;
+  border-left:4px solid var(--amber);
+}
+.fp-em{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--amber);background:rgba(240,165,0,.15);padding:3px 8px;border-radius:3px;}
+.fp-title{font-size:14px;font-weight:800;color:var(--white);}
+.fp-body{padding:18px 20px;}
+.fp-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;}
+.fg{display:flex;flex-direction:column;gap:5px;flex:1;min-width:155px;}
+.fg label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gray400);}
+.fg select,.fg input[type=date],.fg input[type=text],.fg input[type=password]{
+  padding:9px 12px;border:1.5px solid var(--gray200);border-radius:6px;
+  font-size:13px;color:var(--black);background:var(--gray50);
+  width:100%;transition:border-color .15s;font-family:inherit;
+}
+.fg select:focus,.fg input:focus{outline:none;border-color:var(--amber);}
+.go-btn{
+  padding:10px 28px;background:var(--black);color:var(--white);
+  border:none;border-radius:6px;font-size:13px;font-weight:700;
+  cursor:pointer;white-space:nowrap;align-self:flex-end;
+  font-family:inherit;transition:opacity .15s;
+}
+.go-btn:hover{opacity:.85;}
+
+/* ── ANSWER BAR ──────────────────────────────────────────── */
+.ans-bar{
+  background:var(--white);border:1px solid var(--gray200);
+  border-radius:var(--r);padding:18px 22px;
+  margin-bottom:20px;box-shadow:var(--shadow-sm);
+  display:flex;align-items:center;gap:16px;
+  border-left:4px solid var(--amber);
+}
+.ans-em{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--amber);background:rgba(240,165,0,.2);padding:4px 10px;border-radius:4px;}
+.ans-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gray400);margin-bottom:3px;font-weight:600;}
+.ans-txt{font-size:19px;font-weight:800;color:var(--black);letter-spacing:-.3px;}
+
+/* ── KPI TILES ───────────────────────────────────────────── */
+.krow{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:20px;}
+.ktile{
+  background:var(--white);border:1px solid var(--gray200);
+  border-radius:var(--r);padding:18px 20px;
+  box-shadow:var(--shadow-sm);position:relative;
+  transition:box-shadow .15s;
+}
+.ktile:hover{box-shadow:var(--shadow);}
+.ktile::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--gray200);border-radius:0 0 var(--r) var(--r);}
+.ktile.pos::after{background:var(--green);}
+.ktile.neg::after{background:var(--red);}
+.ktile.hi::after{background:var(--amber);}
+.k-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:10px;}
+.k-num{font-size:30px;font-weight:800;color:var(--black);letter-spacing:-1px;line-height:1;}
+.k-num.pos{color:var(--green);}
+.k-num.neg{color:var(--red);}
+.k-num.hi{color:var(--amber-dark);}
+.k-sub{font-size:11px;color:var(--gray400);margin-top:6px;}
+
+/* ── DATA CARDS ──────────────────────────────────────────── */
+.dcard{background:var(--white);border:1px solid var(--gray200);border-radius:var(--r);margin-bottom:16px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.dcard-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--gray100);}
+.dcard-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--black);}
+.dcard-btn{font-size:11px;color:var(--gray600);background:var(--gray100);border:1px solid var(--gray200);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;}
+
+/* ── TABLES ──────────────────────────────────────────────── */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--black);color:var(--white);padding:10px 14px;text-align:left;white-space:nowrap;font-size:10px;font-weight:700;letter-spacing:.4px;position:sticky;top:0;}
+td{padding:10px 14px;border-bottom:1px solid var(--gray100);white-space:nowrap;font-size:12px;color:var(--black);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--gray50);}
+.c-pos{color:var(--green);font-weight:700;}
+.c-neg{color:var(--red);font-weight:700;}
+.c-ok{color:var(--green);font-weight:700;}
+.c-err{color:var(--red);font-weight:700;}
+.nodata{padding:40px;text-align:center;color:var(--gray400);font-size:13px;font-style:italic;}
+
+/* ── BAR CHART ───────────────────────────────────────────── */
+.bwrap{padding:18px 20px;}
+.brow{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.blbl{width:84px;font-size:11px;color:var(--gray400);text-align:right;flex-shrink:0;}
+.btrack{flex:1;background:var(--gray100);border-radius:4px;height:22px;overflow:hidden;}
+.bfill{height:100%;background:var(--black);border-radius:4px;transition:width .5s;}
+.bval{width:90px;font-size:11px;font-weight:600;color:var(--black);}
+
+/* ── USAGE ───────────────────────────────────────────────── */
+.usage-hero{
+  background:var(--black);border-radius:var(--r);
+  padding:28px 32px;margin-bottom:20px;
+  display:grid;grid-template-columns:auto 1fr;gap:40px;
+  border-left:4px solid var(--amber);
+}
+.cost-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);font-weight:700;margin-bottom:8px;}
+.cost-num{font-size:68px;font-weight:800;color:var(--white);letter-spacing:-3px;line-height:1;}
+.cost-amber{color:var(--amber);}
+.cost-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:10px;line-height:1.8;}
+.cost-sub b{color:var(--white);}
+.ctx{border-left:1px solid rgba(255,255,255,.08);padding-left:32px;}
+.ctx-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.3);font-weight:700;margin-bottom:12px;}
+.ctx-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;}
+.ctx-row:last-child{border:none;}
+.ctx-k{color:rgba(255,255,255,.45);}
+.ctx-v{color:var(--white);font-weight:700;}
+.ptabs{display:flex;gap:6px;}
+.ptab{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.08);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.ptab.on{background:var(--amber);color:var(--black);border-color:var(--amber);}
+.u-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:14px;}
+.u-title{font-size:22px;font-weight:800;letter-spacing:-.5px;}
+.u-sub{font-size:12px;color:var(--gray400);margin-top:3px;}
+.err-bar{background:var(--red-bg);border:1px solid var(--red);border-radius:var(--r);padding:13px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.clean-bar{background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r);padding:13px 18px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--green);}
+
+/* ── LOADING ─────────────────────────────────────────────── */
+.loader{display:flex;flex-direction:column;align-items:center;padding:80px 20px;color:var(--gray400);}
+.spin{width:38px;height:38px;border:3px solid var(--gray200);border-top-color:var(--amber);border-radius:50%;animation:sp .7s linear infinite;margin-bottom:14px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.loader p{font-size:13px;font-weight:500;}
+
+/* ── WELCOME ─────────────────────────────────────────────── */
+.welcome{display:flex;flex-direction:column;align-items:center;padding:80px 40px;text-align:center;}
+.w-mark{width:auto;height:60px;background:var(--black);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;letter-spacing:1px;color:var(--amber);margin-bottom:22px;box-shadow:var(--shadow-md);border:3px solid var(--amber);padding:0 24px;}
+.w-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px;}
+.w-sub{font-size:14px;color:var(--gray400);line-height:1.7;max-width:380px;margin-bottom:26px;}
+.w-hint{font-size:12px;color:var(--gray400);background:var(--white);border:1px solid var(--gray200);padding:10px 22px;border-radius:20px;display:inline-block;box-shadow:var(--shadow-sm);}
+
+/* ── SCROLL HINT ─────────────────────────────────────────── */
+.scrhint{display:none;position:fixed;bottom:20px;right:20px;background:var(--black);color:var(--white);border:2px solid var(--amber);border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;z-index:100;box-shadow:var(--shadow-md);animation:bob .9s ease infinite alternate;}
+@keyframes bob{from{transform:translateY(0);}to{transform:translateY(-5px);}}
+
+/* ── LOGIN ───────────────────────────────────────────────── */
+.login-ov{position:fixed;inset:0;background:rgba(10,10,10,.92);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.login-box{background:var(--white);border-radius:16px;padding:48px 44px;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,.4);border-top:5px solid var(--amber);}
+.l-logo{text-align:center;font-size:48px;margin-bottom:14px;}
+.l-title{text-align:center;font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;}
+.l-sub{text-align:center;font-size:13px;color:var(--gray400);margin-bottom:28px;}
+.lf{margin-bottom:16px;}
+.lf label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gray400);margin-bottom:6px;}
+.lf input{width:100%;padding:12px 14px;border:2px solid var(--gray200);border-radius:8px;font-size:15px;font-family:inherit;color:var(--black);background:var(--gray50);transition:border-color .15s;}
+.lf input:focus{outline:none;border-color:var(--amber);}
+.l-btn{width:100%;background:var(--black);color:var(--white);border:none;padding:14px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;transition:opacity .15s;}
+.l-btn:hover{opacity:.85;}
+.l-err{color:var(--red);font-size:12px;text-align:center;margin-top:10px;display:none;}
+.l-note{font-size:11px;color:var(--gray300);text-align:center;margin-top:16px;line-height:1.5;}
+
+@media(max-width:900px){
+  .sidebar{display:none;}.main{margin-left:0;}
+  .usage-hero{grid-template-columns:1fr;}
+  .ctx{border-left:none;border-top:1px solid rgba(255,255,255,.08);padding-left:0;padding-top:20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-ov" id="loginOv">
+  <div class="login-box">
+    <div class="l-logo" style="font-size:32px;font-weight:900;color:var(--amber)">LWH</div>
+    <div class="l-title">LWH Transport</div>
+    <div class="l-sub">Quick Answers — Sign in to continue</div>
+    <div class="lf"><label>Your Name</label><input type="text" id="lName" placeholder="e.g. Doug Moore" autocomplete="name"></div>
+    <div class="lf"><label>Access Code</label><input type="password" id="lCode" placeholder="Enter access code" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="l-btn" onclick="doLogin()">Sign In →</button>
+    <div class="l-err" id="lErr">Incorrect access code. Try again.</div>
+    <div class="l-note">Your name is saved on this device · Contact Tim for the access code</div>
+  </div>
+</div>
+
+<!-- SCROLL HINT -->
+<div class="scrhint" id="scrhint" onclick="scrollFP()">▲ Filters above</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">LWH</div>
+    <div class="hdr-name">LWH TRANSPORT<span>Quick Answers</span></div>
+  </div>
+  <div class="hdr-stats">
+    <div class="hstat"><div class="hstat-l">Data Range</div><div class="hstat-v" id="hRange">Loading...</div></div>
+    <div class="hstat"><div class="hstat-l">Captures</div><div class="hstat-v" id="hCap">—</div></div>
+  </div>
+  <div class="hdr-right">
+    <button class="inst-btn" id="instBtn" onclick="installPWA()">⬇ Install App</button>
+    <div class="upill" onclick="logOut()" title="Click to sign out">
+      <div class="uav" id="uAv">?</div>
+      <div class="unm" id="uNm">...</div>
+    </div>
+  </div>
+</header>
+
+<!-- SHELL -->
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Trucks</div>
+      <button class="sb-btn" onclick="sel('truck',this)"><div class="sb-ic">TRK</div>Truck performance</button>
+      <button class="sb-btn" onclick="sel('truck_vs',this)"><div class="sb-ic">CST</div>Driver cost breakdown</button>
+    </div>
+    <div class="sb-rule"></div>
+    <div class="sb-section">
+      <div class="sb-label">Drivers</div>
+      <button class="sb-btn" onclick="sel('driver',this)"><div class="sb-ic">DRV</div>Driver performance</button>
+      <button class="sb-btn" onclick="sel('leaders',this)"><div class="sb-ic">TOP</div>Top margin drivers</button>
+      <button class="sb-btn" onclick="sel('trailers',this)"><div class="sb-ic">BTM</div>Bottom margin drivers</button>
+      <button class="sb-btn" onclick="sel('idle',this)"><div class="sb-ic">ZRO</div>Zero revenue days</button>
+      <button class="sb-btn" onclick="sel('miles',this)"><div class="sb-ic">MI</div>Loaded vs empty miles</button>
+    </div>
+    <div class="sb-rule"></div>
+    <div class="sb-section">
+      <div class="sb-label">Company</div>
+      <button class="sb-btn" onclick="sel('snapshot',this)"><div class="sb-ic">NOW</div>Where are we right now?</button>
+      <button class="sb-btn" onclick="sel('trend',this)"><div class="sb-ic">TRD</div>Daily company trend</button>
+      <button class="sb-btn" onclick="sel('month',this)"><div class="sb-ic">MO</div>Month summary</button>
+      <button class="sb-btn" onclick="sel('efficiency',this)"><div class="sb-ic">EFF</div>Revenue &amp; cost per mile</button>
+    </div>
+    <div class="sb-rule"></div>
+    <div class="sb-section">
+      <div class="sb-label">Fuel</div>
+      <button class="sb-btn" onclick="sel('fuel',this)"><div class="sb-ic">FUEL</div>Fuel expense</button>
+      <button class="sb-btn" onclick="sel('mpg',this)"><div class="sb-ic">MPG</div>Fleet MPG trend</button>
+    </div>
+    <div class="sb-rule"></div>
+    <div class="sb-section">
+      <div class="sb-label">People &amp; Hours</div>
+      <button class="sb-btn" onclick="sel('hours',this)"><div class="sb-ic">HRS</div>Employee hours &amp; pay</button>
+      <button class="sb-btn" onclick="sel('overtime',this)"><div class="sb-ic">OT</div>Overtime analysis</button>
+      <button class="sb-btn" onclick="sel('location',this)"><div class="sb-ic">PAY</div>Weekly payroll summary</button>
+    </div>
+    <div class="sb-rule"></div>
+    <div class="sb-section">
+      <div class="sb-label">Analytics</div>
+      <button class="sb-btn" onclick="sel('revhour',this)"><div class="sb-ic">CON</div>Driver consistency</button>
+      <button class="sb-btn" onclick="sel('compare',this)"><div class="sb-ic">CMP</div>Compare two snapshots</button>
+      <button class="sb-btn" onclick="sel('daytrend',this)"><div class="sb-ic">DAY</div>Same day each month</button>
+      <button class="sb-btn" onclick="sel('dayview',this)"><div class="sb-ic">VIEW</div>Single day view</button>
+    </div>
+    <div class="sb-rule"></div>
+    <div class="sb-section">
+      <div class="sb-label">System</div>
+      <button class="sb-btn" onclick="showUsage(this)"><div class="sb-ic">SYS</div>BigQuery usage &amp; cost</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="fp" id="fp">
+      <div class="fp-head">
+        <div class="fp-em" id="fpEm">QRY</div>
+        <div class="fp-title" id="fpTitle">Select filters</div>
+      </div>
+      <div class="fp-body">
+        <div class="fp-row" id="fpRow"></div>
+      </div>
+    </div>
+    <div id="R">
+      <div class="welcome">
+        <div class="w-mark">LWH</div>
+        <div class="w-title">What do you want to know?</div>
+        <div class="w-sub">Choose a question from the left panel. Select your filters and get the answer instantly — no spreadsheets, no SQL.</div>
+        <div class="w-hint">← Choose a question to get started</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── BACKEND CONFIG ─────────────────────────────────────────
+// Replace with your GAS web app URL after deploying Code.gs
+var GAS_URL = 'YOUR_GAS_WEBAPP_URL_HERE';
+
+// Replaces google.script.run with fetch calls to GAS backend
+var gasRun = {
+  call: function(fn, args, onSuccess, onError) {
+    var params = { fn: fn, args: JSON.stringify(args || []) };
+    var body = Object.keys(params).map(function(k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    }).join('&');
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: body
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) { onError(new Error(data.error)); }
+      else { onSuccess(data.result); }
+    })
+    .catch(function(e) { onError(e); });
+  }
+};
+
+var ACCESS_CODE='LWH2026!';
+var Q={
+  truck:    {t:'Truck Performance',       ic:'TRK',f:['truck','snapshotDate'],                     fn:'getTruckPerformance',   r:'rTable'},
+  truck_vs: {t:'Driver Cost Breakdown',   ic:'CST',f:['snapshotDate'],                              fn:'getDriverCostBreakdown',r:'rTable'},
+  driver:   {t:'Driver Performance',      ic:'DRV',f:['driver','snapshotDate'],                     fn:'getDriverPerformance',  r:'rDriver'},
+  leaders:  {t:'Top Margin Drivers',      ic:'TOP',f:['snapshotDate'],                              fn:'getMarginLeaders',      r:'rTable'},
+  trailers: {t:'Bottom Margin Drivers',   ic:'BTM',f:['snapshotDate'],                              fn:'getMarginTrailers',     r:'rTable'},
+  idle:     {t:'Zero Revenue Days',       ic:'ZRO',f:['driver','snapshotDate'],                     fn:'getIdleDays',           r:'rTable'},
+  miles:    {t:'Loaded vs Empty Miles',   ic:'MI',f:['snapshotDate'],                              fn:'getMilesBreakdown',     r:'rTable'},
+  snapshot: {t:'Company Snapshot',        ic:'NOW',f:['snapshotDate'],                              fn:'getCompanySnapshot',    r:'rSnapshot'},
+  trend:    {t:'Daily Company Trend',     ic:'TRD',f:['dateFrom','dateTo'],                          fn:'getCompanyTrend',       r:'rTable'},
+  month:    {t:'Month Summary',           ic:'MO',f:['month','year'],                               fn:'getMonthSummary',       r:'rMonth'},
+  efficiency:{t:'Revenue & Cost/Mile',   ic:'EFF',f:['dateFrom','dateTo'],                          fn:'getEfficiency',         r:'rTable'},
+  fuel:     {t:'Fuel Expense',            ic:'FUEL',f:['driver','snapshotDate'],                     fn:'getFuelExpense',        r:'rFuel'},
+  mpg:      {t:'Fleet MPG Trend',         ic:'MPG',f:['dateFrom','dateTo'],                          fn:'getMPGTrend',           r:'rTable'},
+  hours:    {t:'Employee Hours & Pay',    ic:'HRS',f:['employee','location','dateFrom','dateTo'],    fn:'getEmployeeHours',      r:'rHours'},
+  overtime: {t:'Overtime Analysis',       ic:'OT',f:['dateFrom','dateTo'],                          fn:'getOvertimeAnalysis',   r:'rTable'},
+  location: {t:'Weekly Payroll Summary',  ic:'PAY',f:['dateFrom','dateTo'],                          fn:'getWeeklyPayroll',      r:'rTable'},
+  revhour:  {t:'Driver Consistency',      ic:'CON',f:['snapshotDate'],                              fn:'getDriverConsistency',  r:'rTable'},
+  compare:  {t:'Compare Two Snapshots',   ic:'CMP',f:['dateA','dateB'],                             fn:'getSnapshotComparison', r:'rCompare'},
+  daytrend: {t:'Same Day Each Month',     ic:'DAY',f:['dayOfMonth'],                                fn:'getMonthlyDayTrend',    r:'rDayTrend'},
+  dayview:  {t:'Single Day View',         ic:'VIEW',f:['dayviewDate'],                               fn:'getSingleDayView',      r:'rDayView'}
+};
+var iD=null,cQ=null,ch={},pwaP=null,cU='';
+
+/* INIT */
+window.addEventListener('load',function(){
+  initLogin();initPWA();
+  gasRun.call('getInitData',[],function(d){iD=d;document.getElementById('hRange').textContent=d.earliest+' – '+d.latest;document.getElementById('hCap').textContent=d.captures+' captures';},function(e){console.error(e);});
+});
+window.addEventListener('scroll',function(){
+  var fp=document.getElementById('fp'),sh=document.getElementById('scrhint');
+  if(!fp||!sh||!fp.classList.contains('on')){sh.style.display='none';return;}
+  sh.style.display=fp.getBoundingClientRect().bottom<0?'block':'none';
+},{passive:true});
+
+/* LOGIN */
+function initLogin(){var s=localStorage.getItem('lwh_u');if(s){setU(s);document.getElementById('loginOv').style.display='none';}}
+function doLogin(){
+  var n=document.getElementById('lName').value.trim(),c=document.getElementById('lCode').value.trim(),e=document.getElementById('lErr');
+  if(!n){e.textContent='Please enter your name.';e.style.display='block';return;}
+  if(c!==ACCESS_CODE){e.textContent='Incorrect access code.';e.style.display='block';return;}
+  localStorage.setItem('lwh_u',n);setU(n);document.getElementById('loginOv').style.display='none';
+}
+function setU(n){cU=n;document.getElementById('uNm').textContent=n;var i=n.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);document.getElementById('uAv').textContent=i||'?';}
+function logOut(){if(!confirm('Sign out?')){return;}localStorage.removeItem('lwh_u');document.getElementById('lName').value='';document.getElementById('lCode').value='';document.getElementById('lErr').style.display='none';document.getElementById('loginOv').style.display='flex';}
+
+/* PWA */
+function initPWA(){
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();pwaP=e;document.getElementById('instBtn').classList.add('on');});
+  window.addEventListener('appinstalled',function(){document.getElementById('instBtn').classList.remove('on');pwaP=null;});
+}
+function installPWA(){
+  if(pwaP){pwaP.prompt();pwaP.userChoice.then(function(r){if(r.outcome==='accepted'){document.getElementById('instBtn').classList.remove('on');}pwaP=null;});}
+  else{alert('To install as a desktop app:\n\nChrome: Click the ⊕ icon in the address bar → Install\nEdge: ··· menu → Apps → Install this site as an app\n\nFull PWA support available via GitHub Pages.');}
+}
+
+/* SELECT */
+function sel(key,el){
+  cQ=key;var q=Q[key];
+  document.querySelectorAll('.sb-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  var fp=document.getElementById('fp');fp.classList.add('on');
+  document.getElementById('fpEm').textContent=q.ic;
+  document.getElementById('fpTitle').textContent=q.t;
+  var row=document.getElementById('fpRow');row.innerHTML='';
+  q.f.forEach(function(f){row.appendChild(mkF(f));});
+  var rb=document.createElement('div');rb.className='fg';
+  rb.innerHTML='<label>&nbsp;</label><button class="go-btn" onclick="runQ()">▶ Get Answer</button>';
+  row.appendChild(rb);
+  if(q.f.length===0){runQ();return;}
+  setTimeout(function(){fp.scrollIntoView({behavior:'smooth',block:'start'});},80);
+}
+function scrollFP(){document.getElementById('fp').scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('scrhint').style.display='none';}
+
+/* FILTERS */
+function mkF(f){
+  var g=document.createElement('div');g.className='fg';
+  var dr=iD?iD.drivers:[],tr=iD?iD.trucks:[],em=iD?iD.employees:[],lc=iD?iD.locations:[];
+  switch(f){
+    case 'truck':var ts=(tr||[]).map(String);g.innerHTML='<label>Truck #</label>'+ms('f-truck',[''].concat(ts),['All Trucks'].concat(ts));break;
+    case 'driver':var di=[''].concat(dr.map(function(d){return d.id;}));g.innerHTML='<label>Driver</label>'+ms('f-driver',di,['All Drivers'].concat(dr.map(function(d){return d.id;})));break;
+    case 'employee':g.innerHTML='<label>Employee</label><input type="text" id="f-employee" placeholder="Name or partial..." list="empL"><datalist id="empL">'+em.map(function(e){return '<option value="'+esc(e.name)+'">';}).join('')+'</datalist>';break;
+    case 'location':g.innerHTML='<label>Location</label>'+ms('f-location',[''].concat(lc),['All Locations'].concat(lc));break;
+    case 'snapshotDate':g.innerHTML='<label>As Of Date</label><input type="date" id="f-snapshotDate" value="'+tod()+'">';break;
+    case 'dayviewDate':g.innerHTML='<label>Select Date</label><input type="date" id="f-dayviewDate" value="">';break;
+    case 'dateFrom':g.innerHTML='<label>From Date</label><input type="date" id="f-dateFrom" value="'+wk()+'">';break;
+    case 'dateTo':g.innerHTML='<label>To Date</label><input type="date" id="f-dateTo" value="'+tod()+'">';break;
+    case 'dateA':g.innerHTML='<label>Snapshot A (Earlier)</label><input type="date" id="f-dateA" value="'+wk()+'">';break;
+    case 'dateB':g.innerHTML='<label>Snapshot B (Later)</label><input type="date" id="f-dateB" value="'+tod()+'">';break;
+    case 'month':var cm=String(new Date().getMonth()+1),mn2=['January','February','March','April','May','June','July','August','September','October','November','December'];g.innerHTML='<label>Month</label>'+ms('f-month',['1','2','3','4','5','6','7','8','9','10','11','12'],mn2,cm);break;
+    case 'year':var yr=new Date().getFullYear(),ys=[String(yr-1),String(yr)];g.innerHTML='<label>Year</label>'+ms('f-year',ys,ys,String(yr));break;
+    case 'dayOfMonth':g.innerHTML='<label>Day of Month</label>'+ms('f-dayOfMonth',['1','5','10','15','20','25','28'],['1st','5th','10th','15th','20th','25th','28th'],'20');break;
+    default:g.innerHTML='<label>'+f+'</label><input type="text" id="f-'+f+'">';
+  }
+  return g;
+}
+function ms(id,vs,ls,sel){var h='<select id="'+id+'">';vs.forEach(function(v,i){h+='<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(ls[i])+'</option>';});return h+'</select>';}
+function gf(){return{truck:gv('f-truck'),driver:gv('f-driver'),employee:gv('f-employee'),location:gv('f-location'),snapshotDate:gv('f-snapshotDate'),dayviewDate:gv('f-dayviewDate'),dateFrom:gv('f-dateFrom'),dateTo:gv('f-dateTo'),dateA:gv('f-dateA'),dateB:gv('f-dateB'),month:gv('f-month'),year:gv('f-year'),dayOfMonth:gv('f-dayOfMonth')};}
+function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+
+/* RUN */
+function runQ(){
+  if(!cQ){return;}var q=Q[cQ],f=gf();
+  if(cQ==='dayview'&&!f.dayviewDate){set('<div class="welcome"><div class="w-mark">DATE</div><div class="w-title">Pick a Date</div><div class="w-sub">Select a date above then click Get Answer.</div></div>');return;}
+  loading();
+  var args=[];
+  switch(cQ){
+    case 'truck':args=[f.truck,f.snapshotDate];break;
+    case 'truck_vs':args=[f.snapshotDate];break;
+    case 'driver':args=[f.driver,f.snapshotDate];break;
+    case 'leaders':args=[f.snapshotDate,false];break;
+    case 'trailers':args=[f.snapshotDate,true];break;
+    case 'idle':args=[f.driver,f.snapshotDate];break;
+    case 'miles':args=[f.snapshotDate];break;
+    case 'snapshot':args=[f.snapshotDate];break;
+    case 'fuel':args=[f.snapshotDate,f.driver];break;
+    case 'revhour':args=[f.snapshotDate];break;
+    case 'dayview':args=[f.dayviewDate];break;
+    case 'trend':args=[f.dateFrom,f.dateTo];break;
+    case 'efficiency':args=[f.dateFrom,f.dateTo];break;
+    case 'mpg':args=[f.dateFrom,f.dateTo];break;
+    case 'overtime':args=[f.dateFrom,f.dateTo];break;
+    case 'location':args=[f.dateFrom,f.dateTo];break;
+    case 'hours':args=[f.employee,f.location,f.dateFrom,f.dateTo];break;
+    case 'month':args=[f.month,f.year];break;
+    case 'compare':args=[f.dateA,f.dateB];break;
+    case 'daytrend':args=[f.dayOfMonth];break;
+    default:args=[];
+  }
+  var hl=buildHL(cQ,f),rdr=q.r,fn=q.fn;
+  gasRun.call(fn,args,function(res){window[rdr](hl,res);},function(e){set('<div class="loader" style="color:var(--red)">ERROR: '+esc(e.message||e)+'</div>');});
+}
+function buildHL(k,f){
+  var sd=f.snapshotDate||'Latest',dl=(f.dateFrom&&f.dateTo)?f.dateFrom+' – '+f.dateTo:(f.dateFrom||f.dateTo||'All Dates');
+  var m={truck:'Truck '+(f.truck||'All')+' — As Of '+sd,truck_vs:'Driver Cost Breakdown — As Of '+sd,driver:(f.driver||'All Drivers')+' — As Of '+sd,leaders:'Top 10 Margin Drivers — As Of '+sd,trailers:'Bottom 10 Margin Drivers — As Of '+sd,idle:'Zero Revenue Days — As Of '+sd,miles:'Loaded vs Empty Miles — As Of '+sd,snapshot:'Company Status — As Of '+sd,fuel:'Fuel Expense — As Of '+sd,revhour:'Driver Consistency — As Of '+sd,dayview:'Single Day View — '+(f.dayviewDate||''),trend:'Daily Trend — '+dl,efficiency:'Revenue & Cost Per Mile — '+dl,mpg:'Fleet MPG Trend — '+dl,overtime:'Overtime Analysis — '+dl,location:'Weekly Payroll — '+dl,hours:(f.employee||'All Employees')+(f.location?' @ '+f.location:'')+' — '+dl,month:mname(f.month)+' '+f.year+' Summary',compare:'Snapshot: '+(f.dateA||'?')+' vs '+(f.dateB||'?'),daytrend:'Day '+(f.dayOfMonth||'20')+' Each Month'};
+  return m[k]||(Q[k]?Q[k].t:k);
+}
+
+/* RENDERERS */
+function rTable(hl,res){set(ah(hl)+dc('Results',tbl(res)));}
+function rDriver(hl,res){
+  var html=ah(hl);
+  if(res.rows&&res.rows.length){var tR=sm(res.rows,3),tM=sm(res.rows,4),tMi=sm(res.rows,6),mr=res.rows.filter(function(r){return +r[11]>0;}),mpg=mr.length?mr.reduce(function(s,r){return s+(+r[11]);},0)/mr.length:0,mp=tR>0?(tM/tR*100).toFixed(1):'0.0';
+  html+=kr([kp('Total Revenue','$'+fmt(tR),'Period total','hi'),kp('Total Margin','$'+fmt(tM),mp+'% of revenue',tM>=0?'pos':'neg'),kp('Total Miles',fmt(tMi)+' mi','Period total',''),kp('Avg MPG',mpg.toFixed(2),'Active days','')]);}
+  set(html+dc('Driver MTD Snapshot',tbl(res)));
+}
+function rSnapshot(hl,res){
+  var html=ah(hl);
+  if(res.summary&&res.summary.rows&&res.summary.rows.length){var r=res.summary.rows[0];
+  html+=kr([kp('MTD Revenue','$'+fmt(r[1]),'Month to date','hi'),kp('MTD Margin','$'+fmt(r[2]),r[3]+'% of revenue',+r[2]>=0?'pos':'neg'),kp('Proj Revenue','$'+fmt(r[4]),'Full month projection',''),kp('Proj Margin','$'+fmt(r[5]),'Full month projection',+r[5]>=0?'pos':'neg'),kp('Rev / Day','$'+fmt(r[6]),'Posted days avg',''),kp('Cost / Day','$'+fmt(r[7]),'Posted days avg',''),kp('Days Posted',r[8]+' of '+r[9],'Working days','')]);}
+  set(html+dc('Driver Performance — Latest Capture',tbl(res.drivers)));
+}
+function rFuel(hl,res){
+  var html=ah(hl);
+  if(res.mtd&&res.mtd.rows&&res.mtd.rows.length){var tf=sm(res.mtd.rows,1),tg=sm(res.mtd.rows,3),pp=tg>0?tf/tg:0,mr2=res.mtd.rows.filter(function(r){return +r[5]>0;}),am=mr2.length?mr2.reduce(function(s,r){return s+(+r[5]);},0)/mr2.length:0;
+  html+=kr([kp('Total Fuel Cost','$'+fmt(tf),'Period total','hi'),kp('Total Gallons',fmt(tg)+' gal','Period total',''),kp('Avg Price/Gal','$'+pp.toFixed(3),'Period avg',''),kp('Avg Fleet MPG',am.toFixed(2),'Period avg','')]);}
+  html+=dc('Company Fuel',tbl(res.mtd));
+  if(res.detail&&res.detail.rows&&res.detail.rows.length){html+=dc('Driver Fuel Detail',tbl(res.detail));}
+  set(html);
+}
+function rHours(hl,res){
+  var html=ah(hl);
+  if(res.summary&&res.summary.rows&&res.summary.rows.length){var tH=sm(res.summary.rows,4),tP=sm(res.summary.rows,8),tOT=sm(res.summary.rows,5);
+  html+=kr([kp('Total Hours',tH.toFixed(1)+' hrs','Actual hours worked','hi'),kp('Total Pay','$'+fmt(tP),'All employees',''),kp('OT Pay','$'+fmt(tOT),'Overtime cost',tOT>0?'neg':'pos'),kp('Employees',res.summary.rows.length,'In result','')]);}
+  set(html+dc('Summary by Employee',tbl(res.summary))+dc('Daily Detail',tbl(res.detail)));
+}
+function rMonth(hl,res){
+  var html=ah(hl);
+  if(res.summary&&res.summary.rows&&res.summary.rows.length){var r=res.summary.rows[0];
+  html+=kr([kp('Final Revenue','$'+fmt(r[1]),'Month total','hi'),kp('Final Margin','$'+fmt(r[2]),r[3]+'%',+r[2]>=0?'pos':'neg'),kp('Rev / Day','$'+fmt(r[5]),'Posted days avg',''),kp('Cost / Day','$'+fmt(r[6]),'Posted days avg',''),kp('Days Posted',r[4],'Working days','')]);}
+  set(html+(res.drivers?dc('Driver Performance',tbl(res.drivers)):''));
+}
+function rCompare(hl,res){
+  var html=ah(hl);
+  if(res.company&&res.company.rows&&res.company.rows.length){var r=res.company.rows[0],rc=parseFloat(r[4])||0,rd=parseFloat(r[14])||0;
+  html+=kr([kp('MTD Revenue A','$'+fmt(r[2]),'As of '+r[0],''),kp('MTD Revenue B','$'+fmt(r[3]),'As of '+r[1],'hi'),kp('Revenue Change','$'+fmt(rc),rc>=0?'▲ Increased':'▼ Decreased',rc>=0?'pos':'neg'),kp('Margin% A',r[8]+'%','Date A',''),kp('Margin% B',r[9]+'%','Date B','hi'),kp('Days Posted',r[10]+' → '+r[11],'Working days',''),kp('Rev/Day Change','$'+fmt(rd),rd>=0?'▲ Up':'▼ Down',rd>=0?'pos':'neg')]);}
+  set(html+dc('Driver Changes',cmpT(res.drivers)));
+}
+function cmpT(res){
+  if(!res||!res.rows||!res.rows.length){return '<div class="nodata">No driver data for selected dates.</div>';}
+  var h='<table><thead><tr>'+res.headers.map(function(h){return '<th>'+esc(h)+'</th>';}).join('')+'</tr></thead><tbody>';
+  res.rows.forEach(function(row){h+='<tr>'+row.map(function(cell,ci){var hd=(res.headers[ci]||'').toLowerCase(),v=(cell===null||cell===undefined)?'—':String(cell),cls='';if(hd.includes('chg')||hd.includes('change')){var n=parseFloat(v);if(!isNaN(n)){cls=' class="'+(n>0?'c-pos':n<0?'c-neg':'')+'"';if(n>0){v='+'+v;}}}return '<td'+cls+'>'+esc(v)+'</td>';}).join('')+'</tr>';});
+  return h+'</tbody></table>';
+}
+function rDayTrend(hl,res){
+  var html=ah(hl);
+  if(!res.summary||!res.summary.rows||!res.summary.rows.length){set(html+dc('Chart','<div class="nodata">Not enough monthly data yet — this chart will populate as more months of captures accumulate.</div>'));return;}
+  html+='<div class="dcard"><div class="dcard-hd"><div class="dcard-title">MTD Revenue & Margin — Same Day Each Month</div></div><div style="padding:16px;position:relative;height:280px"><canvas id="tC"></canvas></div></div>';
+  html+=dc('Monthly Data',tbl(res.summary));set(html);
+  setTimeout(function(){
+    var ctx=document.getElementById('tC');if(!ctx){return;}
+    var labs=res.summary.rows.map(function(r){return r[1]+'/'+r[2];}),rev=res.summary.rows.map(function(r){return parseFloat(r[3])||0;}),mrg=res.summary.rows.map(function(r){return parseFloat(r[4])||0;});
+    if(ch.t){ch.t.destroy();}
+    ch.t=new Chart(ctx,{type:'line',data:{labels:labs,datasets:[{label:'MTD Revenue',data:rev,borderColor:'#0a0a0a',backgroundColor:'rgba(10,10,10,.05)',tension:0.3,fill:true,borderWidth:2,pointRadius:5},{label:'MTD Margin',data:mrg,borderColor:'#f0a500',backgroundColor:'rgba(240,165,0,.08)',tension:0.3,fill:true,borderWidth:2,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#0a0a0a',font:{size:12,weight:'600'}}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': $'+c.parsed.y.toLocaleString('en-US',{minimumFractionDigits:0});}}}},scales:{x:{ticks:{color:'#999',font:{size:11}},grid:{color:'#f2f2f2'}},y:{ticks:{color:'#999',font:{size:11},callback:function(v){return '$'+v.toLocaleString();}},grid:{color:'#f2f2f2'}}}}});
+  },200);
+}
+function rDayView(hl,res){
+  var html=ah(hl);
+  if(res.summary&&res.summary.rows&&res.summary.rows.length){var r=res.summary.rows[0];html+=kr([kp('Capture Date',r[0],'Data as of this date',''),kp('MTD Revenue','$'+fmt(r[1]),'Month to date','hi'),kp('MTD Margin','$'+fmt(r[2]),r[3]+'% of revenue',+r[2]>=0?'pos':'neg'),kp('Proj Revenue','$'+fmt(r[4]),'Full month',''),kp('Proj Margin','$'+fmt(r[5]),'Full month',+r[5]>=0?'pos':'neg'),kp('Rev / Day','$'+fmt(r[6]),'Posted days avg',''),kp('Days Posted',r[8]+' of '+r[9],'Working days','')]);}
+  if(res.drivers&&res.drivers.rows&&res.drivers.rows.length){var neg=res.drivers.rows.filter(function(r){return parseFloat(r[4])<0;}).length;html+=kr([kp('Active Drivers',res.drivers.rows.length,'In this capture',''),kp('Negative Margin',neg+' drivers','Running at a loss',neg>0?'neg':'pos')]);html+=dc('Driver MTD Snapshot',tbl(res.drivers));}
+  if(res.hours&&res.hours.rows&&res.hours.rows.length){html+=kr([kp('Total Hours',sm(res.hours.rows,4).toFixed(1)+' hrs','This day','hi'),kp('Total Pay','$'+fmt(sm(res.hours.rows,10)),'This day',''),kp('Employees',res.hours.rows.length,'With hours','')]);html+=dc('Employee Hours',tbl(res.hours));}
+  else{html+=dc('Employee Hours','<div class="nodata">No hours records for this exact date.</div>');}
+  set(html);
+}
+
+/* USAGE */
+function showUsage(el){document.querySelectorAll('.sb-btn').forEach(function(b){b.classList.remove('on');});if(el){el.classList.add('on');}cQ=null;document.getElementById('fp').classList.remove('on');loadUsage(30);}
+function loadUsage(days){
+  loading();
+  gasRun.call('getBQUsageStats',[days],function(res){renderUsage(res);},function(e){set('<div class="loader" style="color:var(--red)">ERROR: '+esc(e.message||e)+'</div>');});
+}
+function renderUsage(res){
+  if(res.error){set('<div class="loader" style="color:var(--red)"> '+esc(res.error)+'</div>');return;}
+  var s=(res.summary&&res.summary.rows&&res.summary.rows.length)?res.summary.rows[0]:null;
+  var tq=s?(+s[0]||0):0,uu=s?(+s[1]||0):0,ad=s?(+s[2]||0):0,gb=s?(+s[3]||0):0,ec=s?(+s[4]||0):0,ams=s?(+s[5]||0):0,err=s?(+s[7]||0):0;
+  var tb=gb/1024,pf=Math.min(tb/1*100,100).toFixed(4),pm=res.days<30?(ec/res.days*30).toFixed(6):ec.toFixed(6);
+  var html='<div class="u-hdr"><div><div class="u-title"> BigQuery Usage & Cost</div><div class="u-sub">All LWH apps · Last '+res.days+' days · '+new Date().toLocaleDateString()+(cU?' · Viewed by '+esc(cU):'')+'</div></div>';
+  html+='<div class="ptabs"><button class="ptab'+(res.days===7?' on':'')+'" onclick="loadUsage(7)">7 days</button><button class="ptab'+(res.days===30?' on':'')+'" onclick="loadUsage(30)">30 days</button><button class="ptab'+(res.days===90?' on':'')+'" onclick="loadUsage(90)">90 days</button></div></div>';
+  html+='<div class="usage-hero"><div><div class="cost-label">Estimated Cost — Last '+res.days+' Days</div><div class="cost-num">$<span class="cost-amber">'+ec.toFixed(4)+'</span></div><div class="cost-sub">'+gb.toFixed(4)+' GB processed · '+tq.toLocaleString()+' queries · '+uu+' user'+(uu!==1?'s':'')+'<br><b>Projected monthly: $'+pm+'</b> · Free tier: 1 TB/month ($0 up to that)<br>You have used <b>'+pf+'%</b> of your free monthly quota</div></div>';
+  html+='<div class="ctx"><div class="ctx-lbl">What does this buy?</div>';
+  [['"Your cost this period"','$'+ec.toFixed(4)],['Cost of a coffee','$5.00'],['Sheets API alternative','$15–50/mo'],['Custom BI tool license','$50–500/mo'],['Free tier remaining',tb<1?((1-tb)*1024).toFixed(1)+' GB free':'Over free tier'],['Queries per dollar',tq>0&&ec>0?Math.round(tq/ec).toLocaleString()+' queries/$1':'Within free tier']].forEach(function(r){html+='<div class="ctx-row"><span class="ctx-k">'+esc(r[0])+'</span><span class="ctx-v">'+esc(r[1])+'</span></div>';});
+  html+='</div></div>';
+  html+=kr([kp('Total Queries',tq.toLocaleString(),'Last '+res.days+' days','hi'),kp('Unique Users',uu,'Service accounts',''),kp('Active Days',ad+' / '+res.days,'Days with queries',''),kp('Avg Speed',ams+' ms','Per query',''),kp('Errors',err,err===0?'Clean run':'↓ See detail below',err===0?'pos':'neg'),kp('Est Monthly','$'+pm,'At current rate','')]);
+  if(res.errors&&res.errors.rows&&res.errors.rows.length){var ec2=res.errors.rows.length,ed=res.errors.rows[0]?res.errors.rows[0][0]:'';html+='<div class="err-bar" onclick="toggleErr()"><div><span id="eI">▶</span> <b style="color:var(--red)"> '+ec2+' Failed Queries</b> <span style="font-size:11px;color:#888;margin-left:8px">Most recent: '+esc(ed)+' · Click to expand</span></div><span style="font-size:11px;color:#888">Dev/test errors — normal</span></div><div id="eD" style="display:none">'+dc('Error Detail',tbl(res.errors))+'</div>';}
+  else{html+='<div class="clean-bar">NO ERRORS — CLEAN RUN</div>';}
+  if(res.daily&&res.daily.rows&&res.daily.rows.length){var mx=Math.max.apply(null,res.daily.rows.map(function(r){return +r[1]||0;}));html+='<div class="dcard"><div class="dcard-hd"><div class="dcard-title">Daily Query Volume</div></div><div class="bwrap">';res.daily.rows.slice(0,14).forEach(function(r){var p=mx>0?(+r[1]/mx*100):0;html+='<div class="brow"><div class="blbl">'+esc(r[0])+'</div><div class="btrack"><div class="bfill" style="width:'+p+'%"></div></div><div class="bval">'+r[1]+' queries</div></div>';});html+='</div></div>';}
+  if(res.byUser&&res.byUser.rows&&res.byUser.rows.length){html+=dc('Usage by User / Service Account',tbl(res.byUser));}
+  if(res.byTable&&res.byTable.rows&&res.byTable.rows.length){html+=dc('Usage by Table — Which Apps Query What',tbl(res.byTable));}
+  if(res.recent&&res.recent.rows&&res.recent.rows.length){
+    html+='<div class="dcard"><div class="dcard-hd"><div class="dcard-title">Recent Query Log</div><button class="dcard-btn" onclick="togLog(this)">Show All</button></div><div class="tw"><table><thead><tr>';
+    res.recent.headers.forEach(function(h){html+='<th>'+esc(h)+'</th>';});
+    html+='</tr></thead><tbody id="lB">';
+    res.recent.rows.forEach(function(row,ri){var hide=ri>=10?' style="display:none"':'',cls=ri>=10?' class="lx"':'';html+='<tr'+cls+hide+'>';row.forEach(function(cell,ci){var hd=(res.recent.headers[ci]||'').toLowerCase(),v=(cell===null||cell===undefined)?'—':String(cell);if(hd==='status'){html+='<td class="'+(v==='OK'?'c-ok':'c-err')+'">'+esc(v)+'</td>';}else if(hd.includes('cost')){var n=parseFloat(v);if(!isNaN(n)){v='$'+n.toFixed(8);}html+='<td>'+esc(v)+'</td>';}else{html+='<td>'+esc(v)+'</td>';}});html+='</tr>';});
+    html+='</tbody></table></div></div>';
+  }
+  set(html);
+}
+function toggleErr(){var d=document.getElementById('eD'),i=document.getElementById('eI');if(!d){return;}var o=d.style.display!=='none';d.style.display=o?'none':'block';if(i){i.textContent=o?'▶':'▼';}}
+function togLog(btn){document.querySelectorAll('.lx').forEach(function(r){r.style.display=r.style.display==='none'?'':'none';});btn.textContent=btn.textContent==='Show All'?'Show Less':'Show All';}
+
+/* BUILDERS */
+function ah(txt){var q=cQ?Q[cQ]:null;return '<div class="ans-bar"><div class="ans-em">'+(q?q.ic:'EFF')+'</div><div><div class="ans-lbl">Your Answer</div><div class="ans-txt">'+esc(txt)+'</div></div></div>';}
+function dc(title,body){return '<div class="dcard"><div class="dcard-hd"><div class="dcard-title">'+esc(title)+'</div></div><div class="tw">'+body+'</div></div>';}
+function kr(arr){return '<div class="krow">'+arr.join('')+'</div>';}
+function kp(l,v,s,t){return '<div class="ktile'+(t?' '+t:'')+'"><div class="k-lbl">'+esc(l)+'</div><div class="k-num'+(t?' '+t:'')+'">'+(v===null||v===undefined?'—':v)+'</div><div class="k-sub">'+esc(s||'')+'</div></div>';}
+function tbl(res){
+  if(!res||!res.rows||!res.rows.length){return '<div class="nodata">No data found for this selection.</div>';}
+  var cur=['revenue','margin','fuel cost','total cost','labor cost','wages','maint cost','rev/day','cost/day','total pay','regular pay','ot pay','pto pay','proj revenue','proj margin','mtd revenue','mtd margin','period pay','mtd rev'],
+      skp=['days','count','drivers','weeks','pct',' %','hours','mpg','gallons','miles','rate','/gal','margin pct','loaded','empty'];
+  var h='<table><thead><tr>'+res.headers.map(function(hd){return '<th>'+esc(hd)+'</th>';}).join('')+'</tr></thead><tbody>';
+  res.rows.forEach(function(row){h+='<tr>'+row.map(function(cell,ci){var hd=(res.headers[ci]||'').toLowerCase(),v=(cell===null||cell===undefined)?'—':String(cell),cls='';if(hd.includes('margin')&&!hd.includes('pct')&&!hd.includes('%')){var nm=parseFloat(v);if(!isNaN(nm)){cls=' class="'+(nm>=0?'c-pos':'c-neg')+'"';}}var isc=cur.some(function(c){return hd.includes(c);})&&!skp.some(function(s){return hd.includes(s);});if(isc&&v!=='—'&&v!=='null'){var nc=parseFloat(v);if(!isNaN(nc)){v='$'+nc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}}return '<td'+cls+'>'+esc(v)+'</td>';}).join('')+'</tr>';});
+  return h+'</tbody></table>';
+}
+function set(html){document.getElementById('R').innerHTML=html;}
+function loading(){set('<div class="loader"><div class="spin"></div><p>Getting your answer...</p></div>');}
+function sm(rows,ci){return rows.reduce(function(s,r){return s+(parseFloat(r[ci])||0);},0);}
+function fmt(n){return(parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function tod(){return new Date().toISOString().split('T')[0];}
+function wk(){var d=new Date();d.setDate(d.getDate()-7);return d.toISOString().split('T')[0];}
+function mname(m){return['','January','February','March','April','May','June','July','August','September','October','November','December'][+m]||m;}
+// ── SERVICE WORKER ─────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/lwh-transport/sw.js')
+      .then(function(reg) { console.log('SW registered:', reg.scope); })
+      .catch(function(e)  { console.log('SW failed:', e); });
+  });
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>

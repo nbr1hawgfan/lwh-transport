@@ -400,41 +400,28 @@ tr:hover td{background:var(--gray50);}
 // ── BACKEND CONFIG ─────────────────────────────────────────
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwlAGZKoZcu6YrP71Blyl8F7WF9X5j9UKBDqnwXsj9tTT05QA08UzQ77hng2Qse4sA5Ug/exec';
 
-// JSONP approach — works cross-origin without CORS issues
-// GAS doGet returns callback(json) when ?callback=X is set
+// Fetch with no-cors won't work, JSONP has redirect issues with GAS.
+// Best approach: fetch with redirect:follow and mode:cors
+// GAS must be deployed as "Anyone" access (no Google login required)
 var gasRun = {
-  _cbId: 0,
   call: function(fn, args, onSuccess, onError) {
-    var cbName = '__gasCb' + (++this._cbId);
-    var timeout = setTimeout(function() {
-      delete window[cbName];
-      onError(new Error('Request timed out'));
-    }, 30000);
-
-    window[cbName] = function(data) {
-      clearTimeout(timeout);
-      delete window[cbName];
-      var s = document.getElementById(cbName + '_s');
-      if (s) { s.parentNode.removeChild(s); }
-      if (data.error) { onError(new Error(data.error)); }
-      else { onSuccess(data.result); }
-    };
-
     var url = GAS_URL +
       '?fn=' + encodeURIComponent(fn) +
-      '&args=' + encodeURIComponent(JSON.stringify(args || [])) +
-      '&callback=' + cbName;
+      '&args=' + encodeURIComponent(JSON.stringify(args || []));
 
-    var script = document.createElement('script');
-    script.id  = cbName + '_s';
-    script.src = url;
-    script.onerror = function() {
-      clearTimeout(timeout);
-      delete window[cbName];
-      script.parentNode.removeChild(script);
-      onError(new Error('Network error calling GAS'));
-    };
-    document.head.appendChild(script);
+    fetch(url, {
+      method: 'GET',
+      redirect: 'follow'
+    })
+    .then(function(r) {
+      if (!r.ok) { throw new Error('HTTP ' + r.status); }
+      return r.json();
+    })
+    .then(function(data) {
+      if (data.error) { onError(new Error(data.error)); }
+      else { onSuccess(data.result); }
+    })
+    .catch(function(e) { onError(e); });
   }
 };
 

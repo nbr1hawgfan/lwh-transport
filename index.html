@@ -506,9 +506,9 @@ function mkF(f){
     case 'location':g.innerHTML='<label>Location</label>'+ms('f-location',[''].concat(lc),['All Locations'].concat(lc));break;
     case 'snapshotDate':g.innerHTML='<label>As Of Date</label><input type="date" id="f-snapshotDate" value="'+tod()+'">';break;
     case 'dayviewDate':g.innerHTML='<label>Select Date</label><input type="date" id="f-dayviewDate" value="">';break;
-    case 'dateFrom':g.innerHTML='<label>From Date</label><input type="date" id="f-dateFrom" value="'+wk()+'">';break;
+    case 'dateFrom':g.innerHTML='<label>From Date</label><input type="date" id="f-dateFrom" value="'+monthStart()+'">';break;
     case 'dateTo':g.innerHTML='<label>To Date</label><input type="date" id="f-dateTo" value="'+tod()+'">';break;
-    case 'dateA':g.innerHTML='<label>Snapshot A (Earlier)</label><input type="date" id="f-dateA" value="'+wk()+'">';break;
+    case 'dateA':g.innerHTML='<label>Snapshot A (Earlier)</label><input type="date" id="f-dateA" value="'+monthStart()+'">';break;
     case 'dateB':g.innerHTML='<label>Snapshot B (Later)</label><input type="date" id="f-dateB" value="'+tod()+'">';break;
     case 'month':var cm=String(new Date().getMonth()+1),mn2=['January','February','March','April','May','June','July','August','September','October','November','December'];g.innerHTML='<label>Month</label>'+ms('f-month',['1','2','3','4','5','6','7','8','9','10','11','12'],mn2,cm);break;
     case 'year':var yr=new Date().getFullYear(),ys=[String(yr-1),String(yr)];g.innerHTML='<label>Year</label>'+ms('f-year',ys,ys,String(yr));break;
@@ -679,7 +679,8 @@ function loading(){set('<div class="loader"><div class="spin"></div><p>Getting y
 function sm(rows,ci){return rows.reduce(function(s,r){return s+(parseFloat(r[ci])||0);},0);}
 function fmt(n){return(parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function tod(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function wk(){var d=new Date();d.setDate(d.getDate()-7);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function monthStart(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';}
+function wk(){return monthStart();}
 function mname(m){return['','January','February','March','April','May','June','July','August','September','October','November','December'][+m]||m;}
 // ── SERVICE WORKER ─────────────────────────────────────────
 if ('serviceWorker' in navigator) {

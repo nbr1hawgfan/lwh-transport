@@ -398,27 +398,43 @@ tr:hover td{background:var(--gray50);}
 
 <script>
 // ── BACKEND CONFIG ─────────────────────────────────────────
-// Replace with your GAS web app URL after deploying Code.gs
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwlAGZKoZcu6YrP71Blyl8F7WF9X5j9UKBDqnwXsj9tTT05QA08UzQ77hng2Qse4sA5Ug/exec';
 
-// Replaces google.script.run with fetch calls to GAS backend
+// JSONP approach — works cross-origin without CORS issues
+// GAS doGet returns callback(json) when ?callback=X is set
 var gasRun = {
+  _cbId: 0,
   call: function(fn, args, onSuccess, onError) {
-    var params = { fn: fn, args: JSON.stringify(args || []) };
-    var body = Object.keys(params).map(function(k) {
-      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-    }).join('&');
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: body
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
+    var cbName = '__gasCb' + (++this._cbId);
+    var timeout = setTimeout(function() {
+      delete window[cbName];
+      onError(new Error('Request timed out'));
+    }, 30000);
+
+    window[cbName] = function(data) {
+      clearTimeout(timeout);
+      delete window[cbName];
+      var s = document.getElementById(cbName + '_s');
+      if (s) { s.parentNode.removeChild(s); }
       if (data.error) { onError(new Error(data.error)); }
       else { onSuccess(data.result); }
-    })
-    .catch(function(e) { onError(e); });
+    };
+
+    var url = GAS_URL +
+      '?fn=' + encodeURIComponent(fn) +
+      '&args=' + encodeURIComponent(JSON.stringify(args || [])) +
+      '&callback=' + cbName;
+
+    var script = document.createElement('script');
+    script.id  = cbName + '_s';
+    script.src = url;
+    script.onerror = function() {
+      clearTimeout(timeout);
+      delete window[cbName];
+      script.parentNode.removeChild(script);
+      onError(new Error('Network error calling GAS'));
+    };
+    document.head.appendChild(script);
   }
 };
 

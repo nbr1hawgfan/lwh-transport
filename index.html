@@ -400,45 +400,21 @@ tr:hover td{background:var(--gray50);}
 // ── BACKEND CONFIG ─────────────────────────────────────────
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwlAGZKoZcu6YrP71Blyl8F7WF9X5j9UKBDqnwXsj9tTT05QA08UzQ77hng2Qse4sA5Ug/exec';
 
-// JSONP — only reliable cross-origin method for GAS
-// GAS ContentService blocks CORS headers; script tag injection bypasses this
+// POST with Content-Type: text/plain — same pattern as all other LWH PWAs
+// This avoids CORS preflight; GAS accepts and responds without CORS block
 var gasRun = {
-  _id: 0,
   call: function(fn, args, onSuccess, onError) {
-    var id  = 'cb' + (++this._id) + '_' + Date.now();
-    var tag = null;
-
-    var timer = setTimeout(function() {
-      cleanup();
-      onError(new Error('Request timed out after 30s'));
-    }, 30000);
-
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[id];
-      if (tag && tag.parentNode) { tag.parentNode.removeChild(tag); }
-    }
-
-    window[id] = function(data) {
-      cleanup();
-      if (data && data.error) { onError(new Error(data.error)); }
-      else if (data && data.result !== undefined) { onSuccess(data.result); }
-      else { onError(new Error('Bad response')); }
-    };
-
-    var url = GAS_URL +
-      '?fn='       + encodeURIComponent(fn) +
-      '&args='     + encodeURIComponent(JSON.stringify(args || [])) +
-      '&callback=' + id +
-      '&_t='       + Date.now();  // cache-bust
-
-    tag = document.createElement('script');
-    tag.src = url;
-    tag.onerror = function() {
-      cleanup();
-      onError(new Error('Script load failed — check GAS deployment'));
-    };
-    document.head.appendChild(tag);
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ fn: fn, args: args || [] })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.error) { onError(new Error(d.error)); }
+      else { onSuccess(d.result); }
+    })
+    .catch(function(e) { onError(e); });
   }
 };
 
